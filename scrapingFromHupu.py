@@ -6,23 +6,33 @@ from email.utils import formataddr
 from email.header import Header
 
 
+# This program access hupu.com, retrieves a player's news in 5 pages, and send messages to a QQ mail user.
+# @auther: Wang Huidong
+# @version: 1.0
+# @since: 07/02/2023
+
+
 def getPages(key, sender, receivers, pw):
+    # This function access bbs.hupu.com and retrieve information of a selected player.
+    # UA camouflage
     head = {
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) "
                       "Chrome/109.0.0.0 Safari/537.36"
     }
-    baseurl = "https://bbs.hupu.com"
+
+    baseurl = "https://bbs.hupu.com"  # source website
     mylist = []
     for i in range(1, 5):
-        url = baseurl + "/502-" + str(i)
+        url = baseurl + "/502-" + str(i)  # in Hupu page number varies with its URL
         res = requests.get(url=url, headers=head)
         res = BeautifulSoup(res.text, 'html.parser')
-        titles = res.select('.bbs-sl-web-post li')
+        titles = res.select('.bbs-sl-web-post li')  # select titles
         for i in titles:
             if key in i.text:
                 newurl = baseurl + i.a['href']
                 print(i.text, newurl)
                 mylist.append((i.text, newurl))
+    # retrieving useful information
     resmsg = ''
     for line in mylist:
         resmsg += line[0]
@@ -31,6 +41,7 @@ def getPages(key, sender, receivers, pw):
 
 
 def sendMail(sender, receivers, mypassword, subject):
+    # This function sends email to a specific user, the email-sending method is universal to all QQ mail users.
     message = MIMEText(subject, 'plain', 'utf-8')
     message['From'] = formataddr(('虎扑', sender))
     message['Subject'] = Header("虎扑有新内容了", 'utf-8')
